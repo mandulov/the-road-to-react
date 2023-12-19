@@ -1,11 +1,16 @@
-import * as React from "react";
+import { ReactNode } from "react";
 
-const title = "React";
+function getTitle(title: string): string {
+  return title;
+}
 
-function App() {
+function App(): ReactNode {
   return (
     <div>
-      <h1>Hello React!</h1>
+      <h1>Hello {getTitle("React")}!</h1>
+
+      <label htmlFor="search">Search: </label>
+      <input id="search" type="text" />
     </div>
   );
 }
