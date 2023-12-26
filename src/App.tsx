@@ -1,44 +1,46 @@
 import { ChangeEvent, FC, FocusEvent, Fragment, ReactNode } from "react";
 
-const list = [
-  {
-    title: "React",
-    url: "https://reactjs.org/",
-    author: "Jordan Walke",
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: "Redux",
-    url: "https://redux.js.org/",
-    author: "Dan Abramov, Andrew Clark",
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-];
+interface Story {
+  title: string;
+  url: string;
+  author: string;
+  num_comments: number;
+  points: number;
+  objectID: number;
+}
 
-type ListItem = (typeof list)[number];
+interface ListItemProps {
+  item: Story;
+}
 
-const List: FC = () => {
+const ListItem: FC<ListItemProps> = ({ item }) => {
+  return (
+    <li key={item.objectID}>
+      <span>
+        <a href={item.url} target="_blank">
+          {item.title}
+        </a>
+      </span>
+      <span>{item.author}</span>
+      <span>{item.num_comments}</span>
+      <span>{item.points}</span>
+    </li>
+  );
+};
+
+interface ListProps {
+  list: Story[];
+}
+
+const List: FC<ListProps> = ({ list }) => {
   return (
     <ul>
       {/* if array items do not have an unique value, */}
       {/* their indices could be used as a last resort, */}
       {/* given that the order of the items in the array doesn't change */}
       {list.map(
-        (x: ListItem): ReactNode => (
-          <li key={x.objectID}>
-            <span>
-              <a href={x.url} target="_blank">
-                {x.title}
-              </a>
-            </span>
-            <span>{x.author}</span>
-            <span>{x.num_comments}</span>
-            <span>{x.points}</span>
-          </li>
+        (item: Story): ReactNode => (
+          <ListItem key={item.objectID} item={item} />
         )
       )}
     </ul>
@@ -68,6 +70,25 @@ const Search: FC = () => {
 };
 
 const App: FC = () => {
+  const stories: Story[] = [
+    {
+      title: "React",
+      url: "https://reactjs.org/",
+      author: "Jordan Walke",
+      num_comments: 3,
+      points: 4,
+      objectID: 0,
+    },
+    {
+      title: "Redux",
+      url: "https://redux.js.org/",
+      author: "Dan Abramov, Andrew Clark",
+      num_comments: 2,
+      points: 5,
+      objectID: 1,
+    },
+  ];
+
   return (
     <div>
       <h1>My Hacker Stories</h1>
@@ -76,7 +97,7 @@ const App: FC = () => {
 
       <hr />
 
-      <List />
+      <List list={stories} />
     </div>
   );
 };
