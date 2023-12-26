@@ -1,4 +1,4 @@
-import { FC, Fragment, ReactNode } from "react";
+import { ChangeEvent, FC, FocusEvent, Fragment, ReactNode } from "react";
 
 const list = [
   {
@@ -46,10 +46,23 @@ const List: FC = () => {
 };
 
 const Search: FC = () => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    console.log("event", event); // synthetic event
+    console.log("event.target.value", event.target.value);
+  };
+  const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
+    console.log("event", event); // synthetic event
+  };
+
   return (
     <Fragment>
       <label htmlFor="search">Search: </label>
-      <input id="search" type="text" />
+      <input
+        id="search"
+        type="text"
+        onChange={handleChange}
+        onBlur={handleBlur}
+      />
     </Fragment>
   );
 };
