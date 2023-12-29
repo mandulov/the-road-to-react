@@ -1,4 +1,11 @@
-import { ChangeEvent, FC, FocusEvent, Fragment, ReactNode } from "react";
+import {
+  ChangeEvent,
+  FC,
+  FocusEvent,
+  Fragment,
+  ReactNode,
+  useState,
+} from "react";
 
 interface Story {
   title: string;
@@ -14,6 +21,8 @@ interface ListItemProps {
 }
 
 const ListItem: FC<ListItemProps> = ({ item }) => {
+  console.log(`"${ListItem.name}" renders.`);
+
   return (
     <li key={item.objectID}>
       <span>
@@ -33,6 +42,8 @@ interface ListProps {
 }
 
 const List: FC<ListProps> = ({ list }) => {
+  console.log(`"${List.name}" renders.`);
+
   return (
     <ul>
       {/* if array items do not have an unique value, */}
@@ -47,10 +58,21 @@ const List: FC<ListProps> = ({ list }) => {
   );
 };
 
-const Search: FC = () => {
+interface SearchProps {
+  onSearch: (event: ChangeEvent<HTMLInputElement>) => void;
+}
+
+const Search: FC<SearchProps> = ({ onSearch }) => {
+  console.log(`"${Search.name}" renders.`);
+
+  const [searchTerm, setSearchTerm] = useState("");
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     console.log("event", event); // synthetic event
     console.log("event.target.value", event.target.value);
+    setSearchTerm(event.target.value);
+
+    onSearch(event);
   };
   const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
     console.log("event", event); // synthetic event
@@ -65,11 +87,16 @@ const Search: FC = () => {
         onChange={handleChange}
         onBlur={handleBlur}
       />
+      <p>
+        Searching for <strong>"{searchTerm}"</strong>.
+      </p>
     </Fragment>
   );
 };
 
 const App: FC = () => {
+  console.log(`"${App.name}" renders.`);
+
   const stories: Story[] = [
     {
       title: "React",
@@ -89,11 +116,16 @@ const App: FC = () => {
     },
   ];
 
+  const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
+    console.log(handleSearch.name);
+    console.log("event.target.value", event.target.value);
+  };
+
   return (
     <div>
       <h1>My Hacker Stories</h1>
 
-      <Search />
+      <Search onSearch={handleSearch} />
 
       <hr />
 
