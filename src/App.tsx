@@ -82,6 +82,7 @@ const Search: FC<SearchProps> = ({ onSearch, searchTerm }) => {
       <input
         id="search"
         type="text"
+        value={searchTerm}
         onChange={handleChange}
         onBlur={handleBlur}
       />
@@ -95,7 +96,7 @@ const Search: FC<SearchProps> = ({ onSearch, searchTerm }) => {
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState("React");
 
   const stories: Story[] = [
     {
@@ -123,7 +124,7 @@ const App: FC = () => {
     setSearchTerm(event.target.value);
   };
 
-  const foundStories: Story[] = stories.filter((story: Story) => story.title.toLowerCase().includes(searchTerm));
+  const foundStories: Story[] = stories.filter((story: Story) => story.title.toLowerCase().includes(searchTerm.toLocaleLowerCase()));
 
   return (
     <div>
