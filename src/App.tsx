@@ -60,17 +60,15 @@ const List: FC<ListProps> = ({ list }) => {
 
 interface SearchProps {
   onSearch: (event: ChangeEvent<HTMLInputElement>) => void;
+  searchTerm: string;
 }
 
-const Search: FC<SearchProps> = ({ onSearch }) => {
+const Search: FC<SearchProps> = ({ onSearch, searchTerm }) => {
   console.log(`"${Search.name}" renders.`);
-
-  const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
     console.log("event", event); // synthetic event
     console.log("event.target.value", event.target.value);
-    setSearchTerm(event.target.value);
 
     onSearch(event);
   };
@@ -97,6 +95,8 @@ const Search: FC<SearchProps> = ({ onSearch }) => {
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const stories: Story[] = [
     {
       title: "React",
@@ -119,17 +119,21 @@ const App: FC = () => {
   const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
     console.log(handleSearch.name);
     console.log("event.target.value", event.target.value);
+
+    setSearchTerm(event.target.value);
   };
+
+  const foundStories: Story[] = stories.filter((story: Story) => story.title.toLowerCase().includes(searchTerm));
 
   return (
     <div>
       <h1>My Hacker Stories</h1>
 
-      <Search onSearch={handleSearch} />
+      <Search onSearch={handleSearch} searchTerm={searchTerm} />
 
       <hr />
 
-      <List list={stories} />
+      <List list={foundStories} />
     </div>
   );
 };
