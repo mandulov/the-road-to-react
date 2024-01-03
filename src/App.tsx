@@ -1,9 +1,11 @@
 import {
   ChangeEvent,
+  Dispatch,
   FC,
   FocusEvent,
   Fragment,
   ReactNode,
+  SetStateAction,
   useEffect,
   useState,
 } from "react";
@@ -94,15 +96,20 @@ const Search: FC<SearchProps> = ({ onSearch, searchTerm }) => {
   );
 };
 
+const useStorageState = (key: string, fallbackValue: string): [string, Dispatch<SetStateAction<string>>] => {
+  const [value, setValue] = useState(localStorage.getItem(key) || fallbackValue);
+
+  useEffect(() => {
+    localStorage.setItem(key, value);
+  }, [key, value]);
+
+  return [value, setValue];
+};
+
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
-  const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm") || "React");
-
-  useEffect(() => {
-    console.log("useEffect");
-    localStorage.setItem('searchTerm', searchTerm);
-  }, [searchTerm]);
+  const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
 
   const stories: Story[] = [
     {
