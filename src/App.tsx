@@ -4,6 +4,7 @@ import {
   FocusEvent,
   Fragment,
   ReactNode,
+  useEffect,
   useState,
 } from "react";
 
@@ -96,7 +97,12 @@ const Search: FC<SearchProps> = ({ onSearch, searchTerm }) => {
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
-  const [searchTerm, setSearchTerm] = useState("React");
+  const [searchTerm, setSearchTerm] = useState(localStorage.getItem("searchTerm") || "React");
+
+  useEffect(() => {
+    console.log("useEffect");
+    localStorage.setItem('searchTerm', searchTerm);
+  }, [searchTerm]);
 
   const stories: Story[] = [
     {
