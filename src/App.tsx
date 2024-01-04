@@ -66,10 +66,11 @@ interface InputWithLabelProps extends PropsWithChildren {
   id: string;
   value: string;
   type?: HTMLInputTypeAttribute;
+  isFocused?: boolean;
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
-const InputWithLabel: FC<InputWithLabelProps> = ({ id, value, type = "text", onInputChange, children }) => {
+const InputWithLabel: FC<InputWithLabelProps> = ({ id, value, type = "text", isFocused = false, onInputChange, children }) => {
   console.log(`"${InputWithLabel.name}" renders.`);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -86,6 +87,7 @@ const InputWithLabel: FC<InputWithLabelProps> = ({ id, value, type = "text", onI
         id={id}
         type={type}
         value={value}
+        autoFocus={isFocused}
         onChange={handleChange}
       />
     </Fragment>
@@ -137,7 +139,7 @@ const App: FC = () => {
     <div>
       <h1>My Hacker Stories</h1>
 
-      <InputWithLabel id="search" value={searchTerm} onInputChange={handleSearch}>
+      <InputWithLabel id="search" value={searchTerm} isFocused onInputChange={handleSearch}>
         <strong>Search:</strong>
       </InputWithLabel>
       <p>
