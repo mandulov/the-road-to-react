@@ -4,6 +4,7 @@ import {
   FC,
   Fragment,
   HTMLInputTypeAttribute,
+  PropsWithChildren,
   ReactNode,
   SetStateAction,
   useEffect,
@@ -61,15 +62,14 @@ const List: FC<ListProps> = ({ list }) => {
   );
 };
 
-interface InputWithLabelProps {
+interface InputWithLabelProps extends PropsWithChildren {
   id: string;
-  label: string;
   value: string;
   type?: HTMLInputTypeAttribute;
   onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
-const InputWithLabel: FC<InputWithLabelProps> = ({ id, label, value, type = "text", onInputChange }) => {
+const InputWithLabel: FC<InputWithLabelProps> = ({ id, value, type = "text", onInputChange, children }) => {
   console.log(`"${InputWithLabel.name}" renders.`);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -80,7 +80,7 @@ const InputWithLabel: FC<InputWithLabelProps> = ({ id, label, value, type = "tex
 
   return (
     <Fragment>
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}>{children}</label>
       &nbsp;
       <input
         id={id}
@@ -137,7 +137,9 @@ const App: FC = () => {
     <div>
       <h1>My Hacker Stories</h1>
 
-      <InputWithLabel id="search" label="Search:" value={searchTerm} onInputChange={handleSearch} />
+      <InputWithLabel id="search" value={searchTerm} onInputChange={handleSearch}>
+        <strong>Search:</strong>
+      </InputWithLabel>
       <p>
         Searching for <strong>"{searchTerm}"</strong>.
       </p>
