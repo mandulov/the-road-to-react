@@ -2,8 +2,8 @@ import {
   ChangeEvent,
   Dispatch,
   FC,
-  FocusEvent,
   Fragment,
+  HTMLInputTypeAttribute,
   ReactNode,
   SetStateAction,
   useEffect,
@@ -61,37 +61,33 @@ const List: FC<ListProps> = ({ list }) => {
   );
 };
 
-interface SearchProps {
-  onSearch: (event: ChangeEvent<HTMLInputElement>) => void;
-  searchTerm: string;
+interface InputWithLabelProps {
+  id: string;
+  label: string;
+  value: string;
+  type?: HTMLInputTypeAttribute;
+  onInputChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }
 
-const Search: FC<SearchProps> = ({ onSearch, searchTerm }) => {
-  console.log(`"${Search.name}" renders.`);
+const InputWithLabel: FC<InputWithLabelProps> = ({ id, label, value, type = "text", onInputChange }) => {
+  console.log(`"${InputWithLabel.name}" renders.`);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
+    console.log(handleChange.name);
     console.log("event", event); // synthetic event
-    console.log("event.target.value", event.target.value);
-
-    onSearch(event);
-  };
-  const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
-    console.log("event", event); // synthetic event
+    onInputChange(event);
   };
 
   return (
     <Fragment>
-      <label htmlFor="search">Search: </label>
+      <label htmlFor={id}>{label}</label>
+      &nbsp;
       <input
-        id="search"
-        type="text"
-        value={searchTerm}
+        id={id}
+        type={type}
+        value={value}
         onChange={handleChange}
-        onBlur={handleBlur}
       />
-      <p>
-        Searching for <strong>"{searchTerm}"</strong>.
-      </p>
     </Fragment>
   );
 };
@@ -132,8 +128,6 @@ const App: FC = () => {
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
     console.log(handleSearch.name);
-    console.log("event.target.value", event.target.value);
-
     setSearchTerm(event.target.value);
   };
 
@@ -143,7 +137,10 @@ const App: FC = () => {
     <div>
       <h1>My Hacker Stories</h1>
 
-      <Search onSearch={handleSearch} searchTerm={searchTerm} />
+      <InputWithLabel id="search" label="Search:" value={searchTerm} onInputChange={handleSearch} />
+      <p>
+        Searching for <strong>"{searchTerm}"</strong>.
+      </p>
 
       <hr />
 
