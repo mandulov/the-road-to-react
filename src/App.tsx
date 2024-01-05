@@ -128,11 +128,23 @@ const initialStories: Story[] = [
   },
 ];
 
+const fetchResponse = { data: { stories: initialStories } } as const;
+type FetchResponse = typeof fetchResponse;
+const fetchStories = () => new Promise<FetchResponse>((resolve) => {
+  setTimeout(() => resolve(fetchResponse), 2000);
+});
+
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
-  const [stories, setStories] = useState(initialStories);
+  const [stories, setStories] = useState<Story[]>([]);
   const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
+
+  useEffect(() => {
+    fetchStories().then((result: FetchResponse): void => {
+      setStories(result.data.stories);
+    });
+  }, []);
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
     console.log(handleSearch.name);
