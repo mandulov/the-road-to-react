@@ -138,12 +138,18 @@ const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
   const [stories, setStories] = useState<Story[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
   const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
 
   useEffect(() => {
+    setIsLoading(true);
     fetchStories().then((result: FetchResponse): void => {
+      setIsLoading(false);
       setStories(result.data.stories);
-    });
+    }).catch(() => {
+      setIsError(true);
+    })
   }, []);
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -171,7 +177,14 @@ const App: FC = () => {
 
       <hr />
 
-      <List list={foundStories} onRemoveItem={handleRemoveStory} />
+      {isError && <p>Something went wrong...</p>}
+
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <List list={foundStories} onRemoveItem={handleRemoveStory} />
+      )
+      }
     </div>
   );
 };
