@@ -152,13 +152,25 @@ type StoryDeletedAction = BaseStoriesAction<typeof StoriesActionType.STORY_DELET
 
 type StoriesAction = StoriesUpdatedAction | StoryDeletedAction;
 
-const storiesReducer: Reducer<Story[], StoriesAction> = (state, action) => {
+interface StoriesState {
+  data: Story[];
+  isLoading: boolean;
+  isError: boolean;
+}
+
+const storiesReducer: Reducer<StoriesState, StoriesAction> = (state, action) => {
   switch (action.type) {
     case StoriesActionType.STORIES_UPDATED:
-      return action.payload;
+      return {
+        ...state,
+        data: action.payload,
+      };
     case StoriesActionType.STORY_DELETED: {
-      const updatedStories: Story[] = state.filter((story: Story): boolean => story !== action.payload);
-      return updatedStories;
+      const updatedStories: Story[] = state.data.filter((story: Story): boolean => story !== action.payload);
+      return {
+        ...state,
+        data: updatedStories,
+      };
     }
     default:
       throw new Error(`Unknown action type "${(action as any).type}".`);
@@ -168,7 +180,7 @@ const storiesReducer: Reducer<Story[], StoriesAction> = (state, action) => {
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
-  const [stories, dispatchStories] = useReducer(storiesReducer, []);
+  const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
@@ -214,7 +226,7 @@ const App: FC = () => {
     });
   };
 
-  const foundStories: Story[] = stories.filter((story: Story) => story.title.toLowerCase().includes(searchTerm.toLocaleLowerCase()));
+  const foundStories: Story[] = stories.data.filter((story: Story) => story.title.toLowerCase().includes(searchTerm.toLocaleLowerCase()));
 
   return (
     <div>
