@@ -6,8 +6,10 @@ import {
   HTMLInputTypeAttribute,
   PropsWithChildren,
   ReactNode,
+  Reducer,
   SetStateAction,
   useEffect,
+  useReducer,
   useState,
 } from "react";
 
@@ -134,10 +136,38 @@ const fetchStories = () => new Promise<FetchResponse>((resolve) => {
   setTimeout(() => resolve(fetchResponse), 2000);
 });
 
+enum StoriesActionType {
+  SET_STORIES = "SET_STORIES",
+  REMOVE_STORY = "REMOVE_STORY",
+}
+
+interface BaseStoriesAction<T extends StoriesActionType, U> {
+  readonly type: T;
+  readonly payload: U;
+}
+
+type SetStoriesAction = BaseStoriesAction<typeof StoriesActionType.SET_STORIES, Story[]>;
+type RemoveStoryAction = BaseStoriesAction<typeof StoriesActionType.REMOVE_STORY, Story>;
+
+type StoriesAction = SetStoriesAction | RemoveStoryAction;
+
+const storiesReducer: Reducer<Story[], StoriesAction> = (state, action) => {
+  switch (action.type) {
+    case StoriesActionType.SET_STORIES:
+      return action.payload;
+    case StoriesActionType.REMOVE_STORY: {
+      const updatedStories: Story[] = state.filter((story: Story): boolean => story !== action.payload);
+      return updatedStories;
+    }
+    default:
+      throw new Error(`Unknown action type "${(action as any).type}".`);
+  }
+};
+
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
-  const [stories, setStories] = useState<Story[]>([]);
+  const [stories, dispatchStories] = useReducer(storiesReducer, []);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
@@ -152,7 +182,10 @@ const App: FC = () => {
         const fetchedStories: Story[] = (await fetchStories()).data.stories;
 
         if (!wasFetchingCancelled) {
-          setStories(fetchedStories);
+          dispatchStories({
+            type: StoriesActionType.SET_STORIES,
+            payload: fetchedStories,
+          });
         }
       } catch {
         setIsError(true);
@@ -174,8 +207,10 @@ const App: FC = () => {
   };
 
   const handleRemoveStory = (story: Story): void => {
-    const updatedStories: Story[] = stories.filter((s: Story): boolean => s !== story);
-    setStories(updatedStories);
+    dispatchStories({
+      type: StoriesActionType.REMOVE_STORY,
+      payload: story,
+    });
   };
 
   const foundStories: Story[] = stories.filter((story: Story) => story.title.toLowerCase().includes(searchTerm.toLocaleLowerCase()));
