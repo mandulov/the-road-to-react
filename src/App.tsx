@@ -143,13 +143,29 @@ const App: FC = () => {
   const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
 
   useEffect(() => {
-    setIsLoading(true);
-    fetchStories().then((result: FetchResponse): void => {
-      setIsLoading(false);
-      setStories(result.data.stories);
-    }).catch(() => {
-      setIsError(true);
-    })
+    // https://github.com/facebook/react/issues/14326#issuecomment-441680293
+    let wasFetchingCancelled = false;
+
+    const getStories = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedStories: Story[] = (await fetchStories()).data.stories;
+
+        if (!wasFetchingCancelled) {
+          setStories(fetchedStories);
+        }
+      } catch {
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getStories();
+
+    return () => {
+      wasFetchingCancelled = true;
+    };
   }, []);
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
