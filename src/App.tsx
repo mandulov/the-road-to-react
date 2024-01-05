@@ -136,9 +136,10 @@ const fetchStories = () => new Promise<FetchResponse>((resolve) => {
   setTimeout(() => resolve(fetchResponse), 2000);
 });
 
+//https://redux.js.org/style-guide/#model-actions-as-events-not-setters
 enum StoriesActionType {
-  SET_STORIES = "SET_STORIES",
-  REMOVE_STORY = "REMOVE_STORY",
+  STORIES_UPDATED = "STORIES_UPDATED",
+  STORY_DELETED = "STORY_DELETED",
 }
 
 interface BaseStoriesAction<T extends StoriesActionType, U> {
@@ -146,16 +147,16 @@ interface BaseStoriesAction<T extends StoriesActionType, U> {
   readonly payload: U;
 }
 
-type SetStoriesAction = BaseStoriesAction<typeof StoriesActionType.SET_STORIES, Story[]>;
-type RemoveStoryAction = BaseStoriesAction<typeof StoriesActionType.REMOVE_STORY, Story>;
+type StoriesUpdatedAction = BaseStoriesAction<typeof StoriesActionType.STORIES_UPDATED, Story[]>;
+type StoryDeletedAction = BaseStoriesAction<typeof StoriesActionType.STORY_DELETED, Story>;
 
-type StoriesAction = SetStoriesAction | RemoveStoryAction;
+type StoriesAction = StoriesUpdatedAction | StoryDeletedAction;
 
 const storiesReducer: Reducer<Story[], StoriesAction> = (state, action) => {
   switch (action.type) {
-    case StoriesActionType.SET_STORIES:
+    case StoriesActionType.STORIES_UPDATED:
       return action.payload;
-    case StoriesActionType.REMOVE_STORY: {
+    case StoriesActionType.STORY_DELETED: {
       const updatedStories: Story[] = state.filter((story: Story): boolean => story !== action.payload);
       return updatedStories;
     }
@@ -183,7 +184,7 @@ const App: FC = () => {
 
         if (!wasFetchingCancelled) {
           dispatchStories({
-            type: StoriesActionType.SET_STORIES,
+            type: StoriesActionType.STORIES_UPDATED,
             payload: fetchedStories,
           });
         }
@@ -208,7 +209,7 @@ const App: FC = () => {
 
   const handleRemoveStory = (story: Story): void => {
     dispatchStories({
-      type: StoriesActionType.REMOVE_STORY,
+      type: StoriesActionType.STORY_DELETED,
       payload: story,
     });
   };
