@@ -22,9 +22,10 @@ interface Story {
 
 interface ListItemProps {
   item: Story;
+  onRemoveItem: (item: Story) => void;
 }
 
-const ListItem: FC<ListItemProps> = ({ item }) => {
+const ListItem: FC<ListItemProps> = ({ item, onRemoveItem }) => {
   console.log(`"${ListItem.name}" renders.`);
 
   return (
@@ -37,15 +38,19 @@ const ListItem: FC<ListItemProps> = ({ item }) => {
       <span>{item.author}</span>
       <span>{item.num_comments}</span>
       <span>{item.points}</span>
+      <span>
+        <button onClick={() => onRemoveItem(item)}>Remove</button>
+      </span>
     </li>
   );
 };
 
 interface ListProps {
   list: Story[];
+  onRemoveItem: (item: Story) => void;
 }
 
-const List: FC<ListProps> = ({ list }) => {
+const List: FC<ListProps> = ({ list, onRemoveItem }) => {
   console.log(`"${List.name}" renders.`);
 
   return (
@@ -55,7 +60,7 @@ const List: FC<ListProps> = ({ list }) => {
       {/* given that the order of the items in the array doesn't change */}
       {list.map(
         (item: Story): ReactNode => (
-          <ListItem key={item.objectID} item={item} />
+          <ListItem key={item.objectID} item={item} onRemoveItem={onRemoveItem} />
         )
       )}
     </ul>
@@ -104,33 +109,39 @@ const useStorageState = (key: string, fallbackValue: string): [string, Dispatch<
   return [value, setValue];
 };
 
+const initialStories: Story[] = [
+  {
+    title: "React",
+    url: "https://reactjs.org/",
+    author: "Jordan Walke",
+    num_comments: 3,
+    points: 4,
+    objectID: 0,
+  },
+  {
+    title: "Redux",
+    url: "https://redux.js.org/",
+    author: "Dan Abramov, Andrew Clark",
+    num_comments: 2,
+    points: 5,
+    objectID: 1,
+  },
+];
+
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
+  const [stories, setStories] = useState(initialStories);
   const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
-
-  const stories: Story[] = [
-    {
-      title: "React",
-      url: "https://reactjs.org/",
-      author: "Jordan Walke",
-      num_comments: 3,
-      points: 4,
-      objectID: 0,
-    },
-    {
-      title: "Redux",
-      url: "https://redux.js.org/",
-      author: "Dan Abramov, Andrew Clark",
-      num_comments: 2,
-      points: 5,
-      objectID: 1,
-    },
-  ];
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
     console.log(handleSearch.name);
     setSearchTerm(event.target.value);
+  };
+
+  const handleRemoveStory = (story: Story): void => {
+    const updatedStories: Story[] = stories.filter((s: Story): boolean => s !== story);
+    setStories(updatedStories);
   };
 
   const foundStories: Story[] = stories.filter((story: Story) => story.title.toLowerCase().includes(searchTerm.toLocaleLowerCase()));
@@ -148,7 +159,7 @@ const App: FC = () => {
 
       <hr />
 
-      <List list={foundStories} />
+      <List list={foundStories} onRemoveItem={handleRemoveStory} />
     </div>
   );
 };
