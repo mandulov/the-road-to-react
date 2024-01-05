@@ -138,19 +138,25 @@ const fetchStories = () => new Promise<FetchResponse>((resolve) => {
 
 //https://redux.js.org/style-guide/#model-actions-as-events-not-setters
 enum StoriesActionType {
-  STORIES_UPDATED = "STORIES_UPDATED",
   STORY_DELETED = "STORY_DELETED",
+  FETCHING_STORIES_INITIALIZED = "FETCHING_STORIES_INITIALIZED",
+  FETCHING_STORIES_SUCCEEDED = "FETCHING_STORIES_SUCCEEDED",
+  FETCHING_STORIES_FAILED = "FETCHING_STORIES_FAILED",
 }
 
-interface BaseStoriesAction<T extends StoriesActionType, U> {
+type BaseStoriesAction<T extends StoriesActionType, U = void> = U extends void ? {
+  readonly type: T;
+} : {
   readonly type: T;
   readonly payload: U;
 }
 
-type StoriesUpdatedAction = BaseStoriesAction<typeof StoriesActionType.STORIES_UPDATED, Story[]>;
 type StoryDeletedAction = BaseStoriesAction<typeof StoriesActionType.STORY_DELETED, Story>;
+type FetchingStoriesInitializedAction = BaseStoriesAction<typeof StoriesActionType.FETCHING_STORIES_INITIALIZED>;
+type FetchingStoriesSucceededAction = BaseStoriesAction<typeof StoriesActionType.FETCHING_STORIES_SUCCEEDED, Story[]>;
+type FetchingStoriesFailedAction = BaseStoriesAction<typeof StoriesActionType.FETCHING_STORIES_FAILED>;
 
-type StoriesAction = StoriesUpdatedAction | StoryDeletedAction;
+type StoriesAction = StoryDeletedAction | FetchingStoriesInitializedAction | FetchingStoriesSucceededAction | FetchingStoriesFailedAction;
 
 interface StoriesState {
   data: Story[];
@@ -160,11 +166,6 @@ interface StoriesState {
 
 const storiesReducer: Reducer<StoriesState, StoriesAction> = (state, action) => {
   switch (action.type) {
-    case StoriesActionType.STORIES_UPDATED:
-      return {
-        ...state,
-        data: action.payload,
-      };
     case StoriesActionType.STORY_DELETED: {
       const updatedStories: Story[] = state.data.filter((story: Story): boolean => story !== action.payload);
       return {
@@ -172,8 +173,29 @@ const storiesReducer: Reducer<StoriesState, StoriesAction> = (state, action) => 
         data: updatedStories,
       };
     }
+    case StoriesActionType.FETCHING_STORIES_INITIALIZED:
+      return {
+        ...state,
+        data: [],
+        isLoading: true,
+        isError: false,
+      };
+    case StoriesActionType.FETCHING_STORIES_SUCCEEDED:
+      return {
+        ...state,
+        data: action.payload,
+        isLoading: false,
+        isError: false,
+      };
+    case StoriesActionType.FETCHING_STORIES_FAILED:
+      return {
+        ...state,
+        // data: [],
+        isLoading: false,
+        isError: true,
+      };
     default:
-      throw new Error(`Unknown action type "${(action as any).type}".`);
+      throw new Error(`Unhandled action "${(action as any).type}".`);
   }
 };
 
@@ -181,8 +203,6 @@ const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
   const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
   const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
 
   useEffect(() => {
@@ -190,20 +210,23 @@ const App: FC = () => {
     let wasFetchingCancelled = false;
 
     const getStories = async () => {
-      setIsLoading(true);
+      dispatchStories({
+        type: StoriesActionType.FETCHING_STORIES_INITIALIZED,
+      });
+
       try {
         const fetchedStories: Story[] = (await fetchStories()).data.stories;
 
         if (!wasFetchingCancelled) {
           dispatchStories({
-            type: StoriesActionType.STORIES_UPDATED,
+            type: StoriesActionType.FETCHING_STORIES_SUCCEEDED,
             payload: fetchedStories,
           });
         }
       } catch {
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
+        dispatchStories({
+          type: StoriesActionType.FETCHING_STORIES_FAILED,
+        });
       }
     };
 
@@ -241,9 +264,9 @@ const App: FC = () => {
 
       <hr />
 
-      {isError && <p>Something went wrong...</p>}
+      {stories.isError && <p>Something went wrong...</p>}
 
-      {isLoading ? (
+      {stories.isLoading ? (
         <p>Loading...</p>
       ) : (
         <List list={foundStories} onRemoveItem={handleRemoveStory} />
