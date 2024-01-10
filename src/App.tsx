@@ -111,30 +111,20 @@ const useStorageState = (key: string, fallbackValue: string): [string, Dispatch<
   return [value, setValue];
 };
 
-const initialStories: Story[] = [
-  {
-    title: "React",
-    url: "https://reactjs.org/",
-    author: "Jordan Walke",
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: "Redux",
-    url: "https://redux.js.org/",
-    author: "Dan Abramov, Andrew Clark",
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-];
+const isObject = (obj: unknown): obj is object => obj === Object(obj);
+const STORIES_PROP_NAME = "hits";
+const isValidResponseBody = (body: unknown): body is { [STORIES_PROP_NAME]: Story[] } => isObject(body) && STORIES_PROP_NAME in body;
 
-const fetchResponse = { data: { stories: initialStories } } as const;
-type FetchResponse = typeof fetchResponse;
-const fetchStories = () => new Promise<FetchResponse>((resolve) => {
-  setTimeout(() => resolve(fetchResponse), 2000);
-});
+const HN_API_BASE_URL = "https://hn.algolia.com"
+const fetchStories = (): Promise<Story[]> => fetch(`${HN_API_BASE_URL}/api/v1/search?query=React`)
+  .then((res: Response): unknown => res.json())
+  .then((body: unknown): Story[] => {
+    if (isValidResponseBody(body)) {
+      return body.hits;
+    }
+
+    throw new TypeError("Invalid response body.");
+  });
 
 //https://redux.js.org/style-guide/#model-actions-as-events-not-setters
 enum StoriesActionType {
@@ -215,7 +205,7 @@ const App: FC = () => {
       });
 
       try {
-        const fetchedStories: Story[] = (await fetchStories()).data.stories;
+        const fetchedStories: Story[] = await fetchStories();
 
         if (!wasFetchingCancelled) {
           dispatchStories({
