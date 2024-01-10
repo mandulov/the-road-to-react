@@ -116,7 +116,7 @@ const STORIES_PROP_NAME = "hits";
 const isValidResponseBody = (body: unknown): body is { [STORIES_PROP_NAME]: Story[] } => isObject(body) && STORIES_PROP_NAME in body;
 
 const HN_API_BASE_URL = "https://hn.algolia.com"
-const fetchStories = (): Promise<Story[]> => fetch(`${HN_API_BASE_URL}/api/v1/search?query=React`)
+const fetchStories = (query: string): Promise<Story[]> => fetch(`${HN_API_BASE_URL}/api/v1/search?query=${query}`)
   .then((res: Response): unknown => res.json())
   .then((body: unknown): Story[] => {
     if (isValidResponseBody(body)) {
@@ -205,7 +205,7 @@ const App: FC = () => {
       });
 
       try {
-        const fetchedStories: Story[] = await fetchStories();
+        const fetchedStories: Story[] = !searchTerm ? [] : await fetchStories(searchTerm);
 
         if (!wasFetchingCancelled) {
           dispatchStories({
@@ -225,7 +225,7 @@ const App: FC = () => {
     return () => {
       wasFetchingCancelled = true;
     };
-  }, []);
+  }, [searchTerm]);
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
     console.log(handleSearch.name);
@@ -238,8 +238,6 @@ const App: FC = () => {
       payload: story,
     });
   };
-
-  const foundStories: Story[] = stories.data.filter((story: Story) => story.title.toLowerCase().includes(searchTerm.toLocaleLowerCase()));
 
   return (
     <div>
@@ -259,7 +257,7 @@ const App: FC = () => {
       {stories.isLoading ? (
         <p>Loading...</p>
       ) : (
-        <List list={foundStories} onRemoveItem={handleRemoveStory} />
+        <List list={stories.data} onRemoveItem={handleRemoveStory} />
       )
       }
     </div>
