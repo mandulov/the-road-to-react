@@ -8,6 +8,7 @@ import {
   ReactNode,
   Reducer,
   SetStateAction,
+  useCallback,
   useEffect,
   useReducer,
   useState,
@@ -195,7 +196,7 @@ const App: FC = () => {
   const [stories, dispatchStories] = useReducer(storiesReducer, { data: [], isLoading: false, isError: false });
   const [searchTerm, setSearchTerm] = useStorageState("searchTerm", "React");
 
-  useEffect(() => {
+  const handleFetchStories = useCallback(() => {
     // https://github.com/facebook/react/issues/14326#issuecomment-441680293
     let wasFetchingCancelled = false;
 
@@ -226,6 +227,8 @@ const App: FC = () => {
       wasFetchingCancelled = true;
     };
   }, [searchTerm]);
+
+  useEffect(handleFetchStories, [handleFetchStories]);
 
   const handleSearch = (event: ChangeEvent<HTMLInputElement>): void => {
     console.log(handleSearch.name);
