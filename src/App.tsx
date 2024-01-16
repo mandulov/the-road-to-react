@@ -15,6 +15,8 @@ import {
   useState,
 } from "react";
 
+import "./App.css";
+
 interface Story {
   title: string;
   url: string;
@@ -33,17 +35,17 @@ const ListItem: FC<ListItemProps> = ({ item, onRemoveItem }) => {
   console.log(`"${ListItem.name}" renders.`);
 
   return (
-    <li key={item.objectID}>
-      <span>
+    <li className="item">
+      <span style={{ width: "40%" }}>
         <a href={item.url} target="_blank">
           {item.title}
         </a>
       </span>
-      <span>{item.author}</span>
-      <span>{item.num_comments}</span>
-      <span>{item.points}</span>
-      <span>
-        <button onClick={() => onRemoveItem(item)}>Remove</button>
+      <span style={{ width: "30%" }}>{item.author}</span>
+      <span style={{ width: "10%" }}>{item.num_comments}</span>
+      <span style={{ width: "10%" }}>{item.points}</span>
+      <span style={{ width: "10%" }}>
+        <button className="button button_small" type="button" onClick={() => onRemoveItem(item)}>Remove</button>
       </span>
     </li>
   );
@@ -90,9 +92,10 @@ const InputWithLabel: FC<InputWithLabelProps> = ({ id, value, type = "text", isF
 
   return (
     <Fragment>
-      <label htmlFor={id}>{children}</label>
+      <label className="label" htmlFor={id}>{children}</label>
       &nbsp;
       <input
+        className="input"
         id={id}
         type={type}
         value={value}
@@ -244,17 +247,14 @@ const App: FC = () => {
   };
 
   return (
-    <div>
-      <h1>My Hacker Stories</h1>
+    <div className="container">
+      <h1 className="headline-primary">My Hacker Stories</h1>
 
-      <InputWithLabel id="search" value={searchTerm} isFocused onInputChange={handleSearch}>
-        <strong>Search:</strong>
-      </InputWithLabel>
-      <p>
-        Searching for <strong>"{searchTerm}"</strong>.
-      </p>
-
-      <hr />
+      <div className="search-form">
+        <InputWithLabel id="search" value={searchTerm} isFocused onInputChange={handleSearch}>
+          <strong>Search:</strong>
+        </InputWithLabel>
+      </div>
 
       {stories.isError && <p>Something went wrong...</p>}
 
