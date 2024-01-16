@@ -15,7 +15,7 @@ import {
   useState,
 } from "react";
 
-import "./App.css";
+import styles from "./App.module.css";
 
 interface Story {
   title: string;
@@ -35,7 +35,7 @@ const ListItem: FC<ListItemProps> = ({ item, onRemoveItem }) => {
   console.log(`"${ListItem.name}" renders.`);
 
   return (
-    <li className="item">
+    <li className={styles.item}>
       <span style={{ width: "40%" }}>
         <a href={item.url} target="_blank">
           {item.title}
@@ -45,7 +45,7 @@ const ListItem: FC<ListItemProps> = ({ item, onRemoveItem }) => {
       <span style={{ width: "10%" }}>{item.num_comments}</span>
       <span style={{ width: "10%" }}>{item.points}</span>
       <span style={{ width: "10%" }}>
-        <button className="button button_small" type="button" onClick={() => onRemoveItem(item)}>Remove</button>
+        <button className={`${styles.button} ${styles.buttonSmall}`} type="button" onClick={() => onRemoveItem(item)}>Remove</button>
       </span>
     </li>
   );
@@ -92,10 +92,10 @@ const InputWithLabel: FC<InputWithLabelProps> = ({ id, value, type = "text", isF
 
   return (
     <Fragment>
-      <label className="label" htmlFor={id}>{children}</label>
+      <label className={styles.label} htmlFor={id}>{children}</label>
       &nbsp;
       <input
-        className="input"
+        className={styles.input}
         id={id}
         type={type}
         value={value}
@@ -247,10 +247,10 @@ const App: FC = () => {
   };
 
   return (
-    <div className="container">
-      <h1 className="headline-primary">My Hacker Stories</h1>
+    <div className={styles.container}>
+      <h1 className={styles.headlinePrimary}>My Hacker Stories</h1>
 
-      <div className="search-form">
+      <div className={styles.searchForm}>
         <InputWithLabel id="search" value={searchTerm} isFocused onInputChange={handleSearch}>
           <strong>Search:</strong>
         </InputWithLabel>
