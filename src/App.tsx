@@ -9,9 +9,12 @@ import {
   ReactNode,
   Reducer,
   SetStateAction,
+  memo,
   useCallback,
   useEffect,
+  useMemo,
   useReducer,
+  useRef,
   useState,
 } from "react";
 import styled from "styled-components";
@@ -67,8 +70,8 @@ const StyledButtonSmall = styled(StyledButton)`
   padding: 5px;
 `;
 
-const ListItem: FC<ListItemProps> = ({ item, onRemoveItem }) => {
-  console.log(`"${ListItem.name}" renders.`);
+const ListItem: FC<ListItemProps> = memo(({ item, onRemoveItem }) => {
+  console.log(`"ListItem" renders.`);
 
   return (
     <StyledItem>
@@ -85,15 +88,15 @@ const ListItem: FC<ListItemProps> = ({ item, onRemoveItem }) => {
       </StyledColumn>
     </StyledItem>
   );
-};
+});
 
 interface ListProps {
   list: Story[];
   onRemoveItem: (item: Story) => void;
 }
 
-const List: FC<ListProps> = ({ list, onRemoveItem }) => {
-  console.log(`"${List.name}" renders.`);
+const List: FC<ListProps> = memo(({ list, onRemoveItem }) => {
+  console.log(`"List" renders.`);
 
   return (
     <ul>
@@ -107,7 +110,7 @@ const List: FC<ListProps> = ({ list, onRemoveItem }) => {
       )}
     </ul>
   );
-};
+});
 
 interface InputWithLabelProps extends PropsWithChildren {
   id: string;
@@ -157,9 +160,15 @@ const InputWithLabel: FC<InputWithLabelProps> = ({ id, value, type = "text", isF
 };
 
 const useStorageState = (key: string, fallbackValue: string): [string, Dispatch<SetStateAction<string>>] => {
+  const isMounted: { current: boolean } = useRef(false);
   const [value, setValue] = useState(localStorage.getItem(key) || fallbackValue);
 
   useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+
     localStorage.setItem(key, value);
   }, [key, value]);
 
@@ -266,6 +275,9 @@ const StyledSearchForm = styled.div`
   align-items: baseline;
 `;
 
+const sumStoriesComments = (stories: Story[]): number =>
+  stories.reduce((accumulator: number, currentValue: Story): number => accumulator + currentValue.num_comments, 0);
+
 const App: FC = () => {
   console.log(`"${App.name}" renders.`);
 
@@ -311,16 +323,18 @@ const App: FC = () => {
     setSearchTerm(event.target.value);
   };
 
-  const handleRemoveStory = (story: Story): void => {
+  const handleRemoveStory = useCallback((story: Story): void => {
     dispatchStories({
       type: StoriesActionType.STORY_DELETED,
       payload: story,
     });
-  };
+  }, [dispatchStories]);
+
+  const totalComments: number = useMemo(() => sumStoriesComments(stories.data), [stories.data]);
 
   return (
     <StyledContainer>
-      <StyledHeadlinePrimary>My Hacker Stories</StyledHeadlinePrimary>
+      <StyledHeadlinePrimary>My Hacker Stories ({totalComments} total comments)</StyledHeadlinePrimary>
 
       <StyledSearchForm>
         <InputWithLabel id="search" value={searchTerm} isFocused onInputChange={handleSearch}>
