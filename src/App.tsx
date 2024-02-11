@@ -191,7 +191,7 @@ const fetchStories = (query: string): Promise<Story[]> => axios.get(`${HN_API_BA
   });
 
 //https://redux.js.org/style-guide/#model-actions-as-events-not-setters
-enum StoriesActionType {
+export enum StoriesActionType {
   STORY_DELETED = "STORY_DELETED",
   FETCHING_STORIES_INITIALIZED = "FETCHING_STORIES_INITIALIZED",
   FETCHING_STORIES_SUCCEEDED = "FETCHING_STORIES_SUCCEEDED",
@@ -355,3 +355,6 @@ const App: FC = () => {
 };
 
 export default App;
+
+export { storiesReducer, InputWithLabel, List, ListItem };
+export type { Story, StoriesAction, StoriesState };
